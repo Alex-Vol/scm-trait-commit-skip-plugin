@@ -16,6 +16,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
 import java.util.Iterator;
 
+import javax.annotation.CheckForNull;
+
 /**
  * @author witokondoria
  */
@@ -25,18 +27,20 @@ public class GitHubCommitSkipTrait extends CommitSkipTrait {
      * Constructor for stapler.
      */
     @DataBoundConstructor
-    public GitHubCommitSkipTrait() {
-        super();
+    public GitHubCommitSkipTrait(@CheckForNull String tokens) {
+        super(tokens);
     }
 
     @Override
     protected void decorateContext(SCMSourceContext<?, ?> context) {
-        context.withFilter(new GitHubCommitSkipTrait.ExcludeCommitPRsSCMHeadFilter());
+        context.withFilter(new GitHubCommitSkipTrait.ExcludeCommitPRsSCMHeadFilter(getTokens()));
     }
+
     /**
      * Our descriptor.
      */
-    @Extension @Symbol("gitHubCommitSkipTrait")
+    @Extension
+    @Symbol("gitHubCommitSkipTrait")
     @SuppressWarnings("unused") // instantiated by Jenkins
     public static class DescriptorImpl extends CommitSkipTraitDescriptorImpl {
 
@@ -58,16 +62,18 @@ public class GitHubCommitSkipTrait extends CommitSkipTrait {
     }
 
     /**
-     * Filter that excludes pull requests according to its last commit message (if it contains [ci skip] or [skip ci], case unsensitive).
+     * Filter that excludes pull requests according to its last commit message (if
+     * it contains [ci skip] or [skip ci], case unsensitive).
      */
-    public static class ExcludeCommitPRsSCMHeadFilter extends ExcludePRsSCMHeadFilter{
+    public static class ExcludeCommitPRsSCMHeadFilter extends ExcludePRsSCMHeadFilter {
 
-        public ExcludeCommitPRsSCMHeadFilter() {
-            super();
+        public ExcludeCommitPRsSCMHeadFilter(String tokens) {
+            super(tokens);
         }
 
         @Override
-        public boolean isExcluded(@NonNull SCMSourceRequest scmSourceRequest, @NonNull SCMHead scmHead) throws IOException, InterruptedException {
+        public boolean isExcluded(@NonNull SCMSourceRequest scmSourceRequest, @NonNull SCMHead scmHead)
+                throws IOException, InterruptedException {
             if (scmHead instanceof PullRequestSCMHead) {
                 Iterable<GHPullRequest> pulls = ((GitHubSCMSourceRequest) scmSourceRequest).getPullRequests();
                 Iterator<GHPullRequest> pullIterator = pulls.iterator();

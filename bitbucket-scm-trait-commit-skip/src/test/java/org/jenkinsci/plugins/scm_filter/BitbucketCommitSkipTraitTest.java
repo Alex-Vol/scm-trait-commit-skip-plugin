@@ -24,16 +24,13 @@ public class BitbucketCommitSkipTraitTest {
     }
 
     private SCMSource load(String dataSet) {
-        return (BitbucketSCMSource) Jenkins.XSTREAM2.fromXML(
-                getClass().getResource(getClass().getSimpleName() + "/" + dataSet + ".xml"));
+        return (BitbucketSCMSource) Jenkins.XSTREAM2
+                .fromXML(getClass().getResource(getClass().getSimpleName() + "/" + dataSet + ".xml"));
     }
 
     @Test
     public void skipci() throws Exception {
         BitbucketSCMSource instance = (BitbucketSCMSource) load();
-        assertThat(instance.getTraits(),
-                containsInAnyOrder(
-                        instanceOf(BitbucketCommitSkipTrait.class))
-        );
+        assertThat(instance.getTraits(), containsInAnyOrder(instanceOf(BitbucketCommitSkipTrait.class)));
     }
 }

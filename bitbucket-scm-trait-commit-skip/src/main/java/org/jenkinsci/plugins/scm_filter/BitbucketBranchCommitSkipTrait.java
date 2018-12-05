@@ -18,28 +18,31 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
 import java.util.Iterator;
 
+import javax.annotation.CheckForNull;
+
 /**
  * @author witokondoria
  */
-public class BitbucketBranchCommitSkipTrait extends BranchCommitSkipTrait{
+public class BitbucketBranchCommitSkipTrait extends BranchCommitSkipTrait {
 
     /**
      * Constructor for stapler.
      */
     @DataBoundConstructor
-    public BitbucketBranchCommitSkipTrait() {
-        super();
+    public BitbucketBranchCommitSkipTrait(@CheckForNull String tokens) {
+        super(tokens);
     }
 
     @Override
     protected void decorateContext(SCMSourceContext<?, ?> context) {
-        context.withFilter(new BitbucketBranchCommitSkipTrait.ExcludeBranchCommitSCMHeadFilter());
+        context.withFilter(new BitbucketBranchCommitSkipTrait.ExcludeBranchCommitSCMHeadFilter(getTokens()));
     }
 
     /**
      * Our descriptor.
      */
-    @Extension @Symbol("bitbucketBranchCommitSkipTrait")
+    @Extension
+    @Symbol("bitbucketBranchCommitSkipTrait")
     @SuppressWarnings("unused") // instantiated by Jenkins
     public static class DescriptorImpl extends BranchCommitSkipTraitDescriptorImpl {
 
@@ -61,16 +64,18 @@ public class BitbucketBranchCommitSkipTrait extends BranchCommitSkipTrait{
     }
 
     /**
-     * Filter that excludes pull requests according to its last commit message (if it contains [ci skip] or [skip ci], case unsensitive).
+     * Filter that excludes pull requests according to its last commit message (if
+     * it contains [ci skip] or [skip ci], case unsensitive).
      */
     public static class ExcludeBranchCommitSCMHeadFilter extends ExcludeBranchesSCMHeadFilter {
 
-        public ExcludeBranchCommitSCMHeadFilter() {
-            super();
+        public ExcludeBranchCommitSCMHeadFilter(String tokens) {
+            super(tokens);
         }
 
         @Override
-        public boolean isExcluded(@NonNull SCMSourceRequest scmSourceRequest, @NonNull SCMHead scmHead) throws IOException, InterruptedException {
+        public boolean isExcluded(@NonNull SCMSourceRequest scmSourceRequest, @NonNull SCMHead scmHead)
+                throws IOException, InterruptedException {
             if (scmHead instanceof BranchSCMHead) {
                 Iterable<BitbucketBranch> branches = ((BitbucketSCMSourceRequest) scmSourceRequest).getBranches();
                 Iterator<BitbucketBranch> branchesIterator = branches.iterator();

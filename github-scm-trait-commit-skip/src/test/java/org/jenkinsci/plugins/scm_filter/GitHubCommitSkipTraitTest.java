@@ -24,16 +24,13 @@ public class GitHubCommitSkipTraitTest {
     }
 
     private SCMSource load(String dataSet) {
-        return (GitHubSCMSource) Jenkins.XSTREAM2.fromXML(
-                getClass().getResource(getClass().getSimpleName() + "/" + dataSet + ".xml"));
+        return (GitHubSCMSource) Jenkins.XSTREAM2
+                .fromXML(getClass().getResource(getClass().getSimpleName() + "/" + dataSet + ".xml"));
     }
 
     @Test
     public void skipci() throws Exception {
         GitHubSCMSource instance = (GitHubSCMSource) load();
-        assertThat(instance.getTraits(),
-                containsInAnyOrder(
-                        instanceOf(GitHubCommitSkipTrait.class))
-                );
+        assertThat(instance.getTraits(), containsInAnyOrder(instanceOf(GitHubCommitSkipTrait.class)));
     }
 }

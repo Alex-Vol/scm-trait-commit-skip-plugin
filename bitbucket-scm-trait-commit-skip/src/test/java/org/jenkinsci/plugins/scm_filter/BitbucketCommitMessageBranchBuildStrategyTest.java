@@ -44,10 +44,10 @@ public class BitbucketCommitMessageBranchBuildStrategyTest {
     @Test
     public void no_skip_build_event_if_no_matches() throws Exception {
         BitbucketCommitMessageBranchBuildStrategy strategy = new BitbucketCommitMessageBranchBuildStrategy(".*test.*");
-        
+
         SCMHead head = mock(SCMHead.class);
         when(head.getName()).thenReturn("feature/release");
-        
+
         BitbucketSCMSource source = new BitbucketSCMSource("amuniz", "test-repos");
         assertThat(strategy.isAutomaticBuild(source, head, buildRevision(head), null), equalTo(true));
     }
@@ -55,7 +55,8 @@ public class BitbucketCommitMessageBranchBuildStrategyTest {
     private BitbucketGitSCMRevision buildRevision(SCMHead head) {
         BitbucketCloudAuthor author = new BitbucketCloudAuthor();
         author.setRaw("builder <no-reply@acme.com>");
-        BitbucketCloudCommit commit = new BitbucketCloudCommit("initial commit", "2018-09-21T14:57:59.455870+00:00", "12345674890", author);
+        BitbucketCloudCommit commit = new BitbucketCloudCommit("initial commit", "2018-09-21T14:57:59.455870+00:00",
+                "12345674890", author);
         return new BitbucketGitSCMRevision(head, commit);
     }
 }

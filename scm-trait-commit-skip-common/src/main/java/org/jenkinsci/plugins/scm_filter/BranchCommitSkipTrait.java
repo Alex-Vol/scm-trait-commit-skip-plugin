@@ -11,12 +11,19 @@ import java.io.IOException;
 /**
  * @author witokondoria
  */
-public abstract class BranchCommitSkipTrait extends SCMSourceTrait{
+public abstract class BranchCommitSkipTrait extends SCMSourceTrait {
+
+    private final String tokens;
 
     /**
      * Constructor for stapler.
      */
-    public BranchCommitSkipTrait(){
+    public BranchCommitSkipTrait(String tokens) {
+        this.tokens = tokens;
+    }
+
+    public String getTokens() {
+        return tokens;
     }
 
     /**
@@ -28,16 +35,15 @@ public abstract class BranchCommitSkipTrait extends SCMSourceTrait{
     /**
      * Our descriptor.
      */
-    public abstract static class BranchCommitSkipTraitDescriptorImpl extends SCMSourceTraitDescriptor{
+    public abstract static class BranchCommitSkipTraitDescriptorImpl extends SCMSourceTraitDescriptor {
 
         /**
          * {@inheritDoc}
          */
         @Override
         public String getDisplayName() {
-            return "Commit message filtering behaviour";
+            return Messages.BranchCommitSkipTrait_DisplayName();
         }
-
 
         /**
          * {@inheritDoc}
@@ -49,11 +55,13 @@ public abstract class BranchCommitSkipTrait extends SCMSourceTrait{
     }
 
     /**
-     * Filter that excludes pull requests according to its last commit message (if it contains [ci skip] or [skip ci], case unsensitive).
+     * Filter that excludes pull requests according to its last commit message (if
+     * it contains [ci skip] or [skip ci], case unsensitive).
      */
     public abstract static class ExcludeBranchesSCMHeadFilter extends CommitSkipTrait.ExcludePRsSCMHeadFilter {
 
-        public ExcludeBranchesSCMHeadFilter() {
+        public ExcludeBranchesSCMHeadFilter(String tokens) {
+            super(tokens);
         }
     }
 }

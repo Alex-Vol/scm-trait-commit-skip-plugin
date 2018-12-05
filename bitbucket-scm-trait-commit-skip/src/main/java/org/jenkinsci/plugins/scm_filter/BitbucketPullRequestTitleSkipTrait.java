@@ -1,48 +1,50 @@
 package org.jenkinsci.plugins.scm_filter;
 
-import com.cloudbees.jenkins.plugins.bitbucket.BitbucketGitSCMBuilder;
-import com.cloudbees.jenkins.plugins.bitbucket.BitbucketSCMSourceRequest;
-import com.cloudbees.jenkins.plugins.bitbucket.PullRequestSCMHead;
-import com.cloudbees.jenkins.plugins.bitbucket.api.BitbucketPullRequest;
-import edu.umd.cs.findbugs.annotations.NonNull;
-import hudson.Extension;
-import org.jenkinsci.Symbol;
-import jenkins.scm.api.SCMHead;
-import jenkins.scm.api.trait.SCMBuilder;
-import jenkins.scm.api.trait.SCMSourceContext;
-import jenkins.scm.api.trait.SCMSourceRequest;
-import org.kohsuke.stapler.DataBoundConstructor;
-
 import java.io.IOException;
 import java.util.Iterator;
 
 import javax.annotation.CheckForNull;
 
+import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import com.cloudbees.jenkins.plugins.bitbucket.BitbucketGitSCMBuilder;
+import com.cloudbees.jenkins.plugins.bitbucket.BitbucketSCMSourceRequest;
+import com.cloudbees.jenkins.plugins.bitbucket.PullRequestSCMHead;
+import com.cloudbees.jenkins.plugins.bitbucket.api.BitbucketPullRequest;
+
+import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.Extension;
+import jenkins.scm.api.SCMHead;
+import jenkins.scm.api.trait.SCMBuilder;
+import jenkins.scm.api.trait.SCMSourceContext;
+import jenkins.scm.api.trait.SCMSourceRequest;
+
 /**
- * @author witokondoria
+ * @author avolanis
  */
-public class BitbucketCommitSkipTrait extends CommitSkipTrait {
+public class BitbucketPullRequestTitleSkipTrait extends TitleSkipTrait {
 
     /**
      * Constructor for stapler.
      */
     @DataBoundConstructor
-    public BitbucketCommitSkipTrait(@CheckForNull String tokens) {
+    public BitbucketPullRequestTitleSkipTrait(@CheckForNull String tokens) {
         super(tokens);
     }
 
     @Override
     protected void decorateContext(SCMSourceContext<?, ?> context) {
-        context.withFilter(new BitbucketCommitSkipTrait.ExcludeCommitPRsSCMHeadFilter(getTokens()));
+        context.withFilter(new BitbucketPullRequestTitleSkipTrait.ExcludeTitlePRsSCMHeadFilter(getTokens()));
     }
 
     /**
      * Our descriptor.
      */
     @Extension
-    @Symbol("bitbucketCommitSkipTrait")
+    @Symbol("bitbucketTitleSkipTrait")
     @SuppressWarnings("unused") // instantiated by Jenkins
-    public static class DescriptorImpl extends CommitSkipTraitDescriptorImpl {
+    public static class DescriptorImpl extends TitleSkipTraitDescriptorImpl {
 
         /**
          * {@inheritDoc}
@@ -62,12 +64,12 @@ public class BitbucketCommitSkipTrait extends CommitSkipTrait {
     }
 
     /**
-     * Filter that excludes pull requests according to its last commit message (if
-     * it contains [ci skip] or [skip ci], case unsensitive).
+     * Filter that excludes pull requests according to its title (if it contains [ci
+     * skip] or [skip ci], case insensitive).
      */
-    public static class ExcludeCommitPRsSCMHeadFilter extends ExcludePRsSCMHeadFilter {
+    public static class ExcludeTitlePRsSCMHeadFilter extends ExcludePRsSCMHeadFilter {
 
-        public ExcludeCommitPRsSCMHeadFilter(String tokens) {
+        public ExcludeTitlePRsSCMHeadFilter(String tokens) {
             super(tokens);
         }
 
@@ -80,8 +82,8 @@ public class BitbucketCommitSkipTrait extends CommitSkipTrait {
                 while (pullIterator.hasNext()) {
                     BitbucketPullRequest pull = pullIterator.next();
                     if (pull.getSource().getBranch().getName().equals(scmHead.getName())) {
-                        String message = pull.getSource().getCommit().getMessage().toLowerCase();
-                        return super.containsSkipToken(message);
+                        String title = pull.getTitle().toLowerCase();
+                        return super.containsSkipToken(title);
                     }
                 }
             }

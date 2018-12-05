@@ -1,5 +1,10 @@
 package org.jenkinsci.plugins.scm_filter;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.plugins.git.GitSCM;
 import hudson.scm.SCMDescriptor;
@@ -10,17 +15,22 @@ import jenkins.scm.api.trait.SCMSourceRequest;
 import jenkins.scm.api.trait.SCMSourceTrait;
 import jenkins.scm.api.trait.SCMSourceTraitDescriptor;
 
-import java.io.IOException;
-
 /**
  * @author witokondoria
  */
-public abstract class CommitSkipTrait extends SCMSourceTrait{
+public abstract class CommitSkipTrait extends SCMSourceTrait {
+
+    private final String tokens;
 
     /**
      * Constructor for stapler.
      */
-    public CommitSkipTrait(){
+    protected CommitSkipTrait(String tokens) {
+        this.tokens = tokens;
+    }
+
+    public String getTokens() {
+        return tokens;
     }
 
     /**
@@ -39,9 +49,8 @@ public abstract class CommitSkipTrait extends SCMSourceTrait{
          */
         @Override
         public String getDisplayName() {
-            return "Commit message filtering behaviour";
+            return Messages.CommitSkipTrait_DisplayName();
         }
-
 
         /**
          * {@inheritDoc}
@@ -53,18 +62,35 @@ public abstract class CommitSkipTrait extends SCMSourceTrait{
     }
 
     /**
-     * Filter that excludes pull requests according to its last commit message (if it contains [ci skip] or [skip ci], case unsensitive).
+     * Filter that excludes pull requests according to its last commit message (if
+     * it contains [ci skip] or [skip ci], case unsensitive).
      */
     public abstract static class ExcludePRsSCMHeadFilter extends SCMHeadFilter {
 
-        public ExcludePRsSCMHeadFilter() {
+        private final Set<String> tokenList;
+
+        public ExcludePRsSCMHeadFilter(String tokens) {
+            Set<String> list = new HashSet<String>();
+            for (String token : tokens.split(",")) {
+                token = token.trim().toLowerCase();
+                if (!token.isEmpty()) {
+                    list.add(token);
+                }
+            }
+            tokenList = Collections.unmodifiableSet(list);
         }
 
         @Override
-        abstract public boolean isExcluded(@NonNull SCMSourceRequest scmSourceRequest, @NonNull SCMHead scmHead) throws IOException, InterruptedException;
+        abstract public boolean isExcluded(@NonNull SCMSourceRequest scmSourceRequest, @NonNull SCMHead scmHead)
+                throws IOException, InterruptedException;
 
         public boolean containsSkipToken(String commitMsg) {
-            return commitMsg.contains("[ci skip]") || commitMsg.contains("[skip ci]");
+            for (String token : tokenList) {
+                if (commitMsg.contains(token)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

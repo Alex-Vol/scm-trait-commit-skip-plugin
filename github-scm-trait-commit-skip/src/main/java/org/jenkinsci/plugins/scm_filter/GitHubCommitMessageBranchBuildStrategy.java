@@ -14,47 +14,48 @@ import org.kohsuke.stapler.QueryParameter;
 import hudson.Extension;
 import hudson.util.FormValidation;
 import jenkins.branch.BranchBuildStrategyDescriptor;
+import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMRevision;
 import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceDescriptor;
 
 public class GitHubCommitMessageBranchBuildStrategy extends CommitMessageBranchBuildStrategy {
 
-	@DataBoundConstructor
-	public GitHubCommitMessageBranchBuildStrategy(@CheckForNull String pattern) {
-		super(pattern);
-	}
+    @DataBoundConstructor
+    public GitHubCommitMessageBranchBuildStrategy(@CheckForNull String pattern) {
+        super(pattern);
+    }
 
-	@Override
-	@CheckForNull
-	public String getMessage(SCMSource source, SCMRevision revision) throws CouldNotGetCommitDataException {
-		GHCommit commit = GitHubUtils.getCommit(source, revision);
-		try {
-			return commit.getCommitShortInfo().getMessage();
-		}
-		catch (IOException e) {
-			throw new CouldNotGetCommitDataException(e);
-		}
-	}
+    @Override
+    @CheckForNull
+    public String getMessage(SCMSource source, SCMHead head, SCMRevision revision)
+            throws CouldNotGetCommitDataException {
+        GHCommit commit = GitHubUtils.getCommit(source, revision);
+        try {
+            return commit.getCommitShortInfo().getMessage();
+        } catch (IOException e) {
+            throw new CouldNotGetCommitDataException(e);
+        }
+    }
 
-	@Extension
-	public static class DescriptorImpl extends RegexFilterBranchBuildStrategyDescriptor {
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public @Nonnull String getDisplayName() {
-			return CommitMessageBranchBuildStrategy.getDisplayName();
-		}
+    @Extension
+    public static class DescriptorImpl extends RegexFilterBranchBuildStrategyDescriptor {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public @Nonnull String getDisplayName() {
+            return CommitMessageBranchBuildStrategy.getDisplayName();
+        }
 
-		/**
-		 * {@inheritDoc}
-		 * this is currently never called for organization folders, see JENKINS-54468
-		 */
-		@Override
-		public boolean isApplicable(@Nonnull SCMSourceDescriptor sourceDescriptor) {
-			return GitHubSCMSource.DescriptorImpl.class.isAssignableFrom(sourceDescriptor.getClass());
-		}
+        /**
+         * {@inheritDoc} this is currently never called for organization folders, see
+         * JENKINS-54468
+         */
+        @Override
+        public boolean isApplicable(@Nonnull SCMSourceDescriptor sourceDescriptor) {
+            return GitHubSCMSource.DescriptorImpl.class.isAssignableFrom(sourceDescriptor.getClass());
+        }
 
-	}
+    }
 }

@@ -16,6 +16,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
 import java.util.Iterator;
 
+import javax.annotation.CheckForNull;
+
 /**
  * @author witokondoria
  */
@@ -25,18 +27,20 @@ public class GitHubBranchCommitSkipTrait extends BranchCommitSkipTrait {
      * Constructor for stapler.
      */
     @DataBoundConstructor
-    public GitHubBranchCommitSkipTrait() {
-        super();
+    public GitHubBranchCommitSkipTrait(@CheckForNull String tokens) {
+        super(tokens);
     }
 
     @Override
     protected void decorateContext(SCMSourceContext<?, ?> context) {
-        context.withFilter(new GitHubBranchCommitSkipTrait.ExcludeBranchCommitSCMHeadFilter());
+        context.withFilter(new GitHubBranchCommitSkipTrait.ExcludeBranchCommitSCMHeadFilter(getTokens()));
     }
+
     /**
      * Our descriptor.
      */
-    @Extension @Symbol("gitHubBranchCommitSkipTrait")
+    @Extension
+    @Symbol("gitHubBranchCommitSkipTrait")
     @SuppressWarnings("unused") // instantiated by Jenkins
     public static class DescriptorImpl extends BranchCommitSkipTraitDescriptorImpl {
 
@@ -58,23 +62,26 @@ public class GitHubBranchCommitSkipTrait extends BranchCommitSkipTrait {
     }
 
     /**
-     * Filter that excludes pull requests according to its last commit message (if it contains [ci skip] or [skip ci], case unsensitive).
+     * Filter that excludes pull requests according to its last commit message (if
+     * it contains [ci skip] or [skip ci], case unsensitive).
      */
-    public static class ExcludeBranchCommitSCMHeadFilter extends ExcludeBranchesSCMHeadFilter{
+    public static class ExcludeBranchCommitSCMHeadFilter extends ExcludeBranchesSCMHeadFilter {
 
-        public ExcludeBranchCommitSCMHeadFilter() {
-            super();
+        public ExcludeBranchCommitSCMHeadFilter(String tokens) {
+            super(tokens);
         }
 
         @Override
-        public boolean isExcluded(@NonNull SCMSourceRequest scmSourceRequest, @NonNull SCMHead scmHead) throws IOException, InterruptedException {
+        public boolean isExcluded(@NonNull SCMSourceRequest scmSourceRequest, @NonNull SCMHead scmHead)
+                throws IOException, InterruptedException {
             if (scmHead instanceof BranchSCMHead) {
                 Iterable<GHBranch> branches = ((GitHubSCMSourceRequest) scmSourceRequest).getBranches();
                 Iterator<GHBranch> branchesIterator = branches.iterator();
                 while (branchesIterator.hasNext()) {
                     GHBranch branch = branchesIterator.next();
                     if ((branch.getName()).equals(scmHead.getName())) {
-                        String message = ((GitHubSCMSourceRequest) scmSourceRequest).getRepository().getCommit(branch.getSHA1()).getCommitShortInfo().getMessage();
+                        String message = ((GitHubSCMSourceRequest) scmSourceRequest).getRepository()
+                                .getCommit(branch.getSHA1()).getCommitShortInfo().getMessage();
                         return super.containsSkipToken(message);
                     }
                 }
