@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>scm-trait-commit-skip-parent</artifactId>
-    <version>0.4.0</version>
+    <version>0.4.0-svt2</version>
     <packaging>pom</packaging>
 
     <name>Commit Skip SCM Behaviour</name>
@@ -25,7 +25,7 @@
 
     <properties>
         <revision>0.4.0</revision>
-        <changelist>-SNAPSHOT</changelist>
+        <changelist>-svt2</changelist>
         <bitbucket-branch-source.version>2.4.4</bitbucket-branch-source.version>
         <github-branch-source.version>2.4.2</github-branch-source.version>
         <scm-api.version>2.4.1</scm-api.version>
