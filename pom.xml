@@ -25,7 +25,7 @@
 
     <properties>
         <revision>0.5.0</revision>
-        <changelist>-SNAPSHOT</changelist>
+        <changelist>-svt1</changelist>
         <bitbucket-branch-source.version>2.4.4</bitbucket-branch-source.version>
         <github-branch-source.version>2.4.2</github-branch-source.version>
         <scm-api.version>2.4.1</scm-api.version>
