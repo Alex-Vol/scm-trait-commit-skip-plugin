@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.scm_filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import hudson.model.TaskListener;
 import jenkins.branch.BranchBuildStrategy;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMRevision;
@@ -39,8 +40,7 @@ public abstract class PullRequestTitleBuildStrategy extends BranchBuildStrategy 
     protected abstract String getTitle(SCMSource source, SCMHead head) throws CouldNotGetCommitDataException;
 
     @Override
-    public boolean isAutomaticBuild(SCMSource source, SCMHead head, SCMRevision currRevision,
-            SCMRevision prevRevision) {
+    public boolean isAutomaticBuild(SCMSource source, SCMHead head, SCMRevision currRevision, SCMRevision prevRevision, TaskListener listener) {
         if (!(head instanceof ChangeRequestSCMHead)) {
             return false;
         }
